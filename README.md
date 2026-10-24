@@ -19,6 +19,7 @@ A comprehensive, curated collection of company-specific **LeetCode** coding inte
 - [Top Companies (Quick Links)](#top-companies-quick-links)
 - [Strategic Interview Preparation Roadmap](#strategic-interview-preparation-roadmap)
 - [Practical Usage & Code Recipes](#practical-usage--code-recipes)
+  - [Interactive CLI Query Tool (`query.py`)](#interactive-cli-query-tool-querypy)
   - [Python / Pandas Recipes](#python--pandas-recipes)
   - [Command-Line Recipes (Bash / PowerShell)](#command-line-recipes-bash--powershell)
 - [Complete Company Directory](#complete-company-directory)
@@ -185,6 +186,27 @@ flowchart LR
 ---
 
 ## 💻 Practical Usage & Code Recipes
+
+### Interactive CLI Query Tool (`query.py`)
+
+A zero-dependency CLI tool ([query.py](query.py)) is included in the root directory to quickly filter, search, and export interview questions across all 200 companies without writing custom scripts:
+
+```bash
+# Top 10 questions asked by Google in the last 6 months
+python query.py -c google -t 6months -n 10
+
+# Search for all Hard problems mentioning "Island" across all companies
+python query.py -q "Island" -d Hard -n 10
+
+# Filter questions for Citadel with minimum frequency threshold of 1.0
+python query.py -c citadel --min-freq 1.0
+
+# Export all Amazon 6-month Medium questions to a custom CSV study file
+python query.py -c amazon -t 6months -d Medium -o amazon_study_list.csv
+
+# List all 200 tracked companies
+python query.py --list-companies
+```
 
 ### Python / Pandas Recipes
 
