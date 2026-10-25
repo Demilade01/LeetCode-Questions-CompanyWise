@@ -13,6 +13,7 @@ A comprehensive, curated collection of company-specific **LeetCode** coding inte
 ## 📌 Table of Contents
 
 - [Overview](#overview)
+- [Interactive Web Dashboard & Deployment](#interactive-web-dashboard--deployment)
 - [Key Features](#key-features)
 - [Dataset Structure & Time Windows](#dataset-structure--time-windows)
 - [CSV Schema & Column Reference](#csv-schema--column-reference)
@@ -38,6 +39,44 @@ This repository organizes **537 clean, machine-readable CSV files** into **200 i
 - Filter problems by recency (focus on the last 6 months for upcoming interviews).
 - Prioritize high-yield questions using algorithmic frequency weights.
 - Filter by difficulty level (`Easy`, `Medium`, `Hard`) and acceptance ratios.
+
+---
+
+## 🌐 Interactive Web Dashboard & Deployment
+
+This repository includes a modern, zero-dependency interactive web dashboard in [`index.html`](index.html).
+
+### ✨ Dashboard Capabilities
+- **Explicit Rank Badges (`#1, #2, #3...`)**: Every problem displays its exact interview encounter rank with gold/silver/bronze highlights for top questions.
+- **Company & Timeframe Switcher**: Instant switching between 200 companies and 4 timeframes (`6months`, `1year`, `2year`, `alltime`).
+- **Live Search & Difficulty Filters**: Filter by `Easy`, `Medium`, `Hard` or search titles & problem IDs as you type.
+- **Prep Progress Checklist**: Mark questions as **Solved** or **Starred** with automatic persistence in your browser's `localStorage`.
+- **Random Problem Picker**: Instant practice by picking a random unsolved problem.
+- **Custom CSV Export**: Export your filtered list with ranks.
+
+---
+
+### 🚀 Deploying to GitHub Pages (Free Hosting)
+You can deploy this dashboard publicly in less than 1 minute:
+
+1. Push your repository to GitHub.
+2. In your GitHub repository, navigate to **Settings** > **Pages** (in the left sidebar).
+3. Under **Build and deployment > Source**, select **Deploy from a branch**.
+4. Set Branch to **`main`** and folder to **`/(root)`**, then click **Save**.
+5. Within 1–2 minutes, your dashboard will be live at:
+   ```
+   https://<your-github-username>.github.io/LeetCode-Questions-CompanyWise/
+   ```
+
+---
+
+### 💻 Running the Dashboard Locally
+To run the dashboard on your machine with one command:
+
+```bash
+python serve.py
+```
+This automatically starts a local web server and opens the dashboard in your default browser at `http://localhost:8000`.
 
 ---
 

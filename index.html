@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode Company-Wise Interview Explorer</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbars */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.3); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.5); }
+    
+    .gold-rank { background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #78350f; font-weight: 700; }
+    .silver-rank { background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%); color: #1e293b; font-weight: 700; }
+    .bronze-rank { background: linear-gradient(135deg, #fed7aa 0%, #ea580c 100%); color: #7c2d12; font-weight: 700; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans transition-colors duration-200">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/20 text-white font-black text-xl">
+          LC
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-lg text-white tracking-tight">LeetCode Explorer</h1>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">Ranked by Recency</span>
+          </div>
+          <p class="text-xs text-slate-400">200 Companies • 537 Curated Question Datasets</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <button id="themeToggle" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition text-xs flex items-center gap-1.5" title="Toggle Dark/Light Mode">
+          <span id="themeIcon">☀️</span>
+        </button>
+
+        <a href="https://github.com/Demilade01/LeetCode-Questions-CompanyWise" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center gap-2 transition border border-slate-700">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Local Server Hint (hidden by default) -->
+  <div id="fileNotice" class="hidden bg-amber-500/10 border-b border-amber-500/20 text-amber-300 text-xs py-2 px-4 text-center">
+    ⚠️ <strong>Local Browser Notice:</strong> Browsers restrict loading CSV files directly over <code>file:///</code>. Run <code>python serve.py</code> in the folder, or visit the live GitHub Pages site.
+  </div>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 w-full flex flex-col gap-6">
+
+    <!-- Category Quick Filters -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+      <span class="text-slate-400 whitespace-nowrap font-medium">Quick Filter:</span>
+      <button class="cat-pill active px-3 py-1 rounded-full bg-blue-600 text-white font-medium hover:bg-blue-500 transition" data-category="faang">🔥 Big Tech (FAANG+)</button>
+      <button class="cat-pill px-3 py-1 rounded-full bg-slate-800 text-slate-300 font-medium hover:bg-slate-700 transition" data-category="fintech">⚡ FinTech & Quant</button>
+      <button class="cat-pill px-3 py-1 rounded-full bg-slate-800 text-slate-300 font-medium hover:bg-slate-700 transition" data-category="unicorns">🦄 Unicorns</button>
+      <button class="cat-pill px-3 py-1 rounded-full bg-slate-800 text-slate-300 font-medium hover:bg-slate-700 transition" data-category="enterprise">🏢 Enterprise</button>
+      <button class="cat-pill px-3 py-1 rounded-full bg-slate-800 text-slate-300 font-medium hover:bg-slate-700 transition" data-category="all">🌐 All 200 Companies</button>
+    </div>
+
+    <!-- Company & Timeframe Bar -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-lg flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+      
+      <!-- Company Dropdown -->
+      <div class="flex-1 min-w-[280px]">
+        <label for="companySelect" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Selected Company</label>
+        <div class="relative">
+          <select id="companySelect" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-medium text-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+            <!-- Populated dynamically via JS -->
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeframe Tabs -->
+      <div class="flex-1">
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Interview Window</label>
+        <div class="grid grid-cols-4 gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800" id="timeframeTabs">
+          <button data-tf="6months" class="tf-btn py-1.5 px-2 rounded-lg text-xs font-medium transition text-center text-slate-300 hover:text-white">6 Months</button>
+          <button data-tf="1year" class="tf-btn py-1.5 px-2 rounded-lg text-xs font-medium transition text-center text-slate-300 hover:text-white">1 Year</button>
+          <button data-tf="2year" class="tf-btn py-1.5 px-2 rounded-lg text-xs font-medium transition text-center text-slate-300 hover:text-white">2 Years</button>
+          <button data-tf="alltime" class="tf-btn py-1.5 px-2 rounded-lg text-xs font-medium transition text-center text-slate-300 hover:text-white">All-Time</button>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-end gap-2">
+        <button id="randomBtn" class="flex-1 sm:flex-initial px-3.5 py-2.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-semibold flex items-center justify-center gap-1.5 transition" title="Pick a random unsolved problem">
+          <span>🎲</span> Random Pick
+        </button>
+        <button id="exportBtn" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium flex items-center justify-center gap-1.5 transition" title="Export current filtered questions to CSV">
+          <span>📥</span> Export
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Dashboard Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+      <!-- Total Questions -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+        <span class="text-xs font-medium text-slate-400">Total In Dataset</span>
+        <div class="flex items-baseline gap-2 mt-1">
+          <span id="statTotal" class="text-2xl font-bold text-white">0</span>
+          <span class="text-xs text-slate-500">questions</span>
+        </div>
+        <div class="text-[11px] text-blue-400 mt-2 font-medium" id="statCompanyLabel">Google (6 Months)</div>
+      </div>
+
+      <!-- Easy Questions -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-medium text-emerald-400">Easy</span>
+          <span id="statEasyPct" class="text-xs text-slate-500 font-medium">0%</span>
+        </div>
+        <div class="flex items-baseline gap-2 mt-1">
+          <span id="statEasy" class="text-2xl font-bold text-emerald-400">0</span>
+        </div>
+        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
+          <div id="statEasyBar" class="bg-emerald-500 h-full rounded-full" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Medium Questions -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-medium text-amber-400">Medium</span>
+          <span id="statMedPct" class="text-xs text-slate-500 font-medium">0%</span>
+        </div>
+        <div class="flex items-baseline gap-2 mt-1">
+          <span id="statMed" class="text-2xl font-bold text-amber-400">0</span>
+        </div>
+        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
+          <div id="statMedBar" class="bg-amber-500 h-full rounded-full" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Hard Questions -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-medium text-rose-400">Hard</span>
+          <span id="statHardPct" class="text-xs text-slate-500 font-medium">0%</span>
+        </div>
+        <div class="flex items-baseline gap-2 mt-1">
+          <span id="statHard" class="text-2xl font-bold text-rose-400">0</span>
+        </div>
+        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
+          <div id="statHardBar" class="bg-rose-500 h-full rounded-full" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prep Progress Tracker Banner -->
+    <div class="bg-gradient-to-r from-blue-900/30 via-indigo-900/20 to-slate-900 border border-blue-500/20 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3 w-full sm:w-auto">
+        <div class="w-10 h-10 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-lg">
+          🎯
+        </div>
+        <div>
+          <div class="text-xs text-slate-400 font-medium">Your Prep Progress</div>
+          <div class="text-sm font-bold text-white flex items-center gap-2">
+            <span id="solvedProgressCount">0 / 0 Solved</span>
+            <span id="solvedProgressPct" class="text-xs text-blue-400 font-semibold">(0%)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex-1 w-full max-w-md">
+        <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden border border-slate-700/50">
+          <div id="solvedProgressBar" class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="resetProgressBtn" class="text-xs text-slate-400 hover:text-rose-400 transition underline underline-offset-2">Reset Progress</button>
+      </div>
+    </div>
+
+    <!-- Filters & Search Toolbar -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Search Input -->
+      <div class="relative flex-1 min-w-[220px]">
+        <input type="text" id="searchInput" placeholder="Search problem title or LeetCode #..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-8 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+        <svg class="w-4 h-4 text-slate-500 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <button id="clearSearchBtn" class="hidden absolute right-2.5 top-2.5 text-slate-500 hover:text-white text-xs">✕</button>
+      </div>
+
+      <!-- Difficulty Buttons -->
+      <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs">
+        <button data-diff="all" class="diff-btn px-2.5 py-1 rounded font-medium transition text-slate-300 bg-slate-800 text-white">All</button>
+        <button data-diff="Easy" class="diff-btn px-2.5 py-1 rounded font-medium transition text-emerald-400 hover:bg-slate-800">Easy</button>
+        <button data-diff="Medium" class="diff-btn px-2.5 py-1 rounded font-medium transition text-amber-400 hover:bg-slate-800">Medium</button>
+        <button data-diff="Hard" class="diff-btn px-2.5 py-1 rounded font-medium transition text-rose-400 hover:bg-slate-800">Hard</button>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="flex items-center gap-1.5 text-xs">
+        <select id="statusFilter" class="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-slate-300 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer">
+          <option value="all">Status: All</option>
+          <option value="unsolved">Status: Unsolved Only</option>
+          <option value="solved">Status: Solved Only</option>
+          <option value="starred">Status: Starred ⭐</option>
+        </select>
+      </div>
+
+      <!-- Sort Filter -->
+      <div class="flex items-center gap-1.5 text-xs">
+        <select id="sortSelect" class="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-slate-300 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer">
+          <option value="rank-asc">Sort: Rank (Frequency High to Low)</option>
+          <option value="id-asc">Sort: LeetCode ID (1 → N)</option>
+          <option value="id-desc">Sort: LeetCode ID (N → 1)</option>
+          <option value="acc-desc">Sort: Acceptance (High to Low)</option>
+          <option value="acc-asc">Sort: Acceptance (Low to High)</option>
+          <option value="title-asc">Sort: Title (A → Z)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Questions Table Container -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-slate-800 bg-slate-950/70 text-slate-400 font-semibold uppercase tracking-wider text-[11px]">
+              <th class="py-3 px-3 text-center w-10">Done</th>
+              <th class="py-3 px-2 text-center w-8">⭐</th>
+              <th class="py-3 px-3 text-center w-16">Rank</th>
+              <th class="py-3 px-3 text-left w-20">LC #</th>
+              <th class="py-3 px-4 text-left">Problem Title</th>
+              <th class="py-3 px-3 text-left w-24">Difficulty</th>
+              <th class="py-3 px-3 text-left w-28">Acceptance</th>
+              <th class="py-3 px-4 text-left w-36">Frequency Weight</th>
+              <th class="py-3 px-4 text-center w-24">Action</th>
+            </tr>
+          </thead>
+          <tbody id="questionsTableBody" class="divide-y divide-slate-800/60 font-medium">
+            <!-- Rows injected by JavaScript -->
+            <tr>
+              <td colspan="9" class="py-12 text-center text-slate-500">
+                <div class="animate-pulse flex flex-col items-center justify-center gap-2">
+                  <div class="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"></div>
+                  <span>Loading interview questions...</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination & Status Footer -->
+      <div class="border-t border-slate-800 bg-slate-950 px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+        <div class="flex items-center gap-2">
+          <span>Showing <span id="showingCount" class="font-semibold text-white">0</span> of <span id="filteredCount" class="font-semibold text-white">0</span> matching problems</span>
+          <span class="text-slate-600">•</span>
+          <select id="pageSizeSelect" class="bg-slate-900 border border-slate-800 rounded px-2 py-1 text-slate-300 text-xs">
+            <option value="25">25 per page</option>
+            <option value="50" selected>50 per page</option>
+            <option value="100">100 per page</option>
+            <option value="all">All questions</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-1.5" id="paginationControls">
+          <button id="prevPageBtn" class="px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-800">Prev</button>
+          <span id="pageIndicator" class="px-2 py-1 font-medium text-slate-300">Page 1 of 1</span>
+          <button id="nextPageBtn" class="px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-800">Next</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 bg-slate-950 py-5 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>Data curated from LeetCode Premium interview reports. Open-source educational tool.</p>
+      <p>Organized across 200 companies with 6M / 1Y / 2Y / All-Time historical tracking.</p>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script>
+    // Embedded companies manifest
+    const COMPANIES_DATA = {"accolite":["alltime"],"adobe":["6months","1year","2year","alltime"],"aetion":["2year","alltime"],"affinity":["alltime"],"affirm":["6months","1year","2year","alltime"],"airbnb":["6months","1year","2year","alltime"],"airtel":["alltime"],"akamai":["alltime"],"akuna":["alltime"],"akuna-capital":["6months","1year","2year","alltime"],"alation":["1year","2year","alltime"],"alibaba":["6months","1year","2year","alltime"],"amazon":["6months","1year","2year","alltime"],"american-express":["alltime"],"appdynamics":["6months","1year","2year","alltime"],"apple":["6months","1year","2year","alltime"],"arista":["alltime"],"arista-networks":["1year","2year","alltime"],"asana":["6months","1year","2year","alltime"],"atlassian":["6months","1year","2year","alltime"],"audible":["6months","1year","2year","alltime"],"baidu":["2year","alltime"],"barclays":["1year","2year","alltime"],"blackrock":["1year","2year","alltime"],"blizzard":["2year","alltime"],"bloomberg":["6months","1year","2year","alltime"],"bloomreach":["alltime"],"booking":["alltime"],"bookingcom":["2year","alltime"],"box":["6months","1year","2year","alltime"],"bytedance":["6months","1year","2year","alltime"],"bytedancetoutiao":["alltime"],"c3-iot":["alltime"],"c3ai":["alltime"],"capital-one":["6months","1year","2year","alltime"],"cisco":["6months","1year","2year","alltime"],"citadel":["6months","1year","2year","alltime"],"citrix":["6months","1year","2year","alltime"],"cloudera":["6months","1year","2year","alltime"],"clutter":["alltime"],"codenation":["alltime"],"cohesity":["1year","2year","alltime"],"coupang":["6months","1year","2year","alltime"],"coursera":["6months","1year","2year","alltime"],"cruise-automation":["6months","1year","2year","alltime"],"databricks":["6months","1year","2year","alltime"],"dataminr":["1year","2year","alltime"],"de-shaw":["alltime"],"deliveryhero":["alltime"],"dell":["1year","2year","alltime"],"deutsche-bank":["2year","alltime"],"didi":["6months","1year","2year","alltime"],"docusign":["6months","1year","2year","alltime"],"doordash":["6months","1year","2year","alltime"],"drawbridge":["2year","alltime"],"dropbox":["6months","1year","2year","alltime"],"druva":["alltime"],"ebay":["6months","1year","2year","alltime"],"electronic-arts":["1year","2year","alltime"],"emc":["2year","alltime"],"epic-systems":["1year","2year","alltime"],"evernote":["1year","2year","alltime"],"expedia":["1year","2year","alltime"],"f5-networks":["alltime"],"facebook":["6months","1year","2year","alltime"],"factset":["6months","1year","2year","alltime"],"fallible":["alltime"],"fidessa":["alltime"],"flexport":["alltime"],"flipkart":["1year","2year","alltime"],"forusall":["2year","alltime"],"garena":["2year","alltime"],"ge-digital":["2year","alltime"],"gilt-groupe":["alltime"],"godaddy":["6months","1year","2year","alltime"],"goldman-sachs":["6months","1year","2year","alltime"],"google":["6months","1year","2year","alltime"],"grab":["1year","2year","alltime"],"groupon":["6months","1year","2year","alltime"],"gsn-games":["alltime"],"hbo":["2year","alltime"],"helix":["alltime"],"honey":["alltime"],"hotstar":["alltime"],"houzz":["1year","2year","alltime"],"hrt":["alltime"],"huawei":["6months","1year","2year","alltime"],"hulu":["6months","1year","2year","alltime"],"ibm":["6months","1year","2year","alltime"],"iit-bombay":["alltime"],"indeed":["6months","1year","2year","alltime"],"infosys":["alltime"],"inmobi":["alltime"],"intel":["1year","2year","alltime"],"intuit":["6months","1year","2year","alltime"],"ixl":["6months","1year","2year","alltime"],"jane-street":["alltime"],"jingchi":["alltime"],"jp-morgan-chase":["alltime"],"jpmorgan":["6months","1year","2year","alltime"],"jump-trading":["2year","alltime"],"kakao":["alltime"],"karat":["6months","1year","2year","alltime"],"leap-motion":["alltime"],"limebike":["alltime"],"linkedin":["6months","1year","2year","alltime"],"liveramp":["1year","2year","alltime"],"lyft":["6months","1year","2year","alltime"],"machine-zone":["alltime"],"machinezone":["alltime"],"maq-software":["alltime"],"mathworks":["6months","1year","2year","alltime"],"mckinsey":["alltime"],"medianet":["alltime"],"meituan":["2year","alltime"],"microsoft":["6months","1year","2year","alltime"],"microstrategy":["alltime"],"morgan-stanley":["1year","2year","alltime"],"national-instruments":["alltime"],"netease":["2year","alltime"],"netflix":["6months","1year","2year","alltime"],"netsuite":["alltime"],"nutanix":["6months","1year","2year","alltime"],"nvidia":["6months","1year","2year","alltime"],"opendoor":["1year","2year","alltime"],"oracle":["6months","1year","2year","alltime"],"palantir":["alltime"],"palantir-technologies":["6months","1year","2year","alltime"],"paypal":["6months","1year","2year","alltime"],"paytm":["alltime"],"phonepe":["alltime"],"pinterest":["6months","1year","2year","alltime"],"pocket-gems":["6months","1year","2year","alltime"],"point72":["alltime"],"ponyai":["2year","alltime"],"poshmark":["alltime"],"postmates":["6months","1year","2year","alltime"],"poynt":["alltime"],"pramp":["alltime"],"pure-storage":["6months","1year","2year","alltime"],"qualcomm":["6months","1year","2year","alltime"],"qualtrics":["6months","1year","2year","alltime"],"quantcast":["2year","alltime"],"quip":["6months","1year","2year","alltime"],"quora":["1year","2year","alltime"],"rackspace":["alltime"],"radius":["2year","alltime"],"reddit":["6months","1year","2year","alltime"],"redfin":["1year","2year","alltime"],"riot-games":["6months","1year","2year","alltime"],"robinhood":["6months","1year","2year","alltime"],"roblox":["6months","1year","2year","alltime"],"rubrik":["2year","alltime"],"salesforce":["6months","1year","2year","alltime"],"samsung":["6months","1year","2year","alltime"],"sap":["6months","1year","2year","alltime"],"sapient":["alltime"],"servicenow":["6months","1year","2year","alltime"],"snapchat":["6months","1year","2year","alltime"],"snapdeal":["alltime"],"splunk":["6months","1year","2year","alltime"],"spotify":["6months","1year","2year","alltime"],"square":["6months","1year","2year","alltime"],"sumologic":["1year","2year","alltime"],"symantec":["2year","alltime"],"tableau":["6months","1year","2year","alltime"],"tandemg":["alltime"],"tencent":["6months","1year","2year","alltime"],"tesla":["6months","1year","2year","alltime"],"thumbtack":["alltime"],"traveloka":["alltime"],"tripadvisor":["1year","2year","alltime"],"triplebyte":["6months","1year","2year","alltime"],"turvo":["alltime"],"twilio":["6months","1year","2year","alltime"],"twitch":["6months","1year","2year","alltime"],"twitter":["6months","1year","2year","alltime"],"two-sigma":["6months","1year","2year","alltime"],"uber":["6months","1year","2year","alltime"],"uipath":["alltime"],"united-health-group":["alltime"],"valve":["2year","alltime"],"virtu":["6months","1year","2year","alltime"],"visa":["6months","1year","2year","alltime"],"vmware":["6months","1year","2year","alltime"],"walmart":["alltime"],"wayfair":["6months","1year","2year","alltime"],"wish":["6months","1year","2year","alltime"],"works-applications":["2year","alltime"],"yahoo":["6months","1year","2year","alltime"],"yandex":["6months","1year","2year","alltime"],"yatra":["alltime"],"yelp":["1year","2year","alltime"],"zalando":["alltime"],"zappos":["1year","2year","alltime"],"zenefits":["alltime"],"zillow":["6months","1year","2year","alltime"],"zoho":["1year","2year","alltime"],"zscaler":["alltime"],"zulily":["1year","2year","alltime"]};
+
+    const POPULAR_CATEGORIES = {
+      faang: ["google", "amazon", "facebook", "apple", "microsoft", "netflix"],
+      fintech: ["citadel", "two-sigma", "bloomberg", "goldman-sachs", "akuna-capital", "jpmorgan", "morgan-stanley", "jane-street", "de-shaw", "point72", "robinhood"],
+      unicorns: ["bytedance", "airbnb", "uber", "doordash", "databricks", "dropbox", "lyft", "pinterest", "spotify", "roblox", "snapchat", "stripe"],
+      enterprise: ["salesforce", "oracle", "cisco", "ibm", "vmware", "servicenow", "nvidia", "intel", "qualcomm"]
+    };
+
+    // State
+    let currentCompany = localStorage.getItem('lc_selected_company') || 'google';
+    let currentTimeframe = localStorage.getItem('lc_selected_timeframe') || '6months';
+    let currentDifficulty = 'all';
+    let currentStatus = 'all';
+    let currentSort = 'rank-asc';
+    let searchQuery = '';
+    let currentPage = 1;
+    let pageSize = 50;
+
+    let rawQuestions = [];
+    let filteredQuestions = [];
+    let solvedSet = new Set(JSON.parse(localStorage.getItem('lc_solved_set') || '[]'));
+    let starredSet = new Set(JSON.parse(localStorage.getItem('lc_starred_set') || '[]'));
+
+    // DOM Elements
+    const companySelect = document.getElementById('companySelect');
+    const timeframeTabs = document.getElementById('timeframeTabs');
+    const questionsTableBody = document.getElementById('questionsTableBody');
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const statusFilter = document.getElementById('statusFilter');
+    const sortSelect = document.getElementById('sortSelect');
+    const pageSizeSelect = document.getElementById('pageSizeSelect');
+    const prevPageBtn = document.getElementById('prevPageBtn');
+    const nextPageBtn = document.getElementById('nextPageBtn');
+    const pageIndicator = document.getElementById('pageIndicator');
+    const showingCount = document.getElementById('showingCount');
+    const filteredCount = document.getElementById('filteredCount');
+    const randomBtn = document.getElementById('randomBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const resetProgressBtn = document.getElementById('resetProgressBtn');
+    const fileNotice = document.getElementById('fileNotice');
+
+    // Stats Elements
+    const statTotal = document.getElementById('statTotal');
+    const statCompanyLabel = document.getElementById('statCompanyLabel');
+    const statEasy = document.getElementById('statEasy');
+    const statEasyPct = document.getElementById('statEasyPct');
+    const statEasyBar = document.getElementById('statEasyBar');
+    const statMed = document.getElementById('statMed');
+    const statMedPct = document.getElementById('statMedPct');
+    const statMedBar = document.getElementById('statMedBar');
+    const statHard = document.getElementById('statHard');
+    const statHardPct = document.getElementById('statHardPct');
+    const statHardBar = document.getElementById('statHardBar');
+    const solvedProgressCount = document.getElementById('solvedProgressCount');
+    const solvedProgressPct = document.getElementById('solvedProgressPct');
+    const solvedProgressBar = document.getElementById('solvedProgressBar');
+
+    // Detect file:/// protocol
+    if (window.location.protocol === 'file:') {
+      fileNotice.classList.remove('hidden');
+    }
+
+    // Capitalize helper
+    function formatCompanyName(slug) {
+      return slug
+        .split('-')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ')
+        .replace(/C3ai/i, 'C3 AI')
+        .replace(/Ibm/i, 'IBM')
+        .replace(/Facebook/i, 'Meta / Facebook')
+        .replace(/Toutiao/i, 'Toutiao (ByteDance)');
+    }
+
+    // Populate Company Dropdown
+    function initCompanyDropdown(filterCategory = 'faang') {
+      companySelect.innerHTML = '';
+      const allCompanies = Object.keys(COMPANIES_DATA).sort();
+
+      let targetList = allCompanies;
+      if (filterCategory !== 'all' && POPULAR_CATEGORIES[filterCategory]) {
+        targetList = allCompanies.filter(c => POPULAR_CATEGORIES[filterCategory].includes(c));
+      }
+
+      // Group into optgroups or clean options
+      targetList.forEach(comp => {
+        const opt = document.createElement('option');
+        opt.value = comp;
+        opt.textContent = `${formatCompanyName(comp)} (${COMPANIES_DATA[comp].length} datasets)`;
+        if (comp === currentCompany) opt.selected = true;
+        companySelect.appendChild(opt);
+      });
+
+      // If current company not in filtered list, select first available
+      if (!targetList.includes(currentCompany)) {
+        currentCompany = targetList[0] || 'google';
+        companySelect.value = currentCompany;
+      }
+    }
+
+    // Update Timeframe Tabs availability
+    function updateTimeframeTabs() {
+      const availableTfs = COMPANIES_DATA[currentCompany] || ['alltime'];
+      if (!availableTfs.includes(currentTimeframe)) {
+        currentTimeframe = availableTfs[0];
+      }
+
+      document.querySelectorAll('.tf-btn').forEach(btn => {
+        const tf = btn.dataset.tf;
+        if (availableTfs.includes(tf)) {
+          btn.disabled = false;
+          btn.classList.remove('opacity-30', 'cursor-not-allowed');
+          if (tf === currentTimeframe) {
+            btn.className = 'tf-btn py-1.5 px-2 rounded-lg text-xs font-semibold transition text-center bg-blue-600 text-white shadow-sm';
+          } else {
+            btn.className = 'tf-btn py-1.5 px-2 rounded-lg text-xs font-medium transition text-center text-slate-300 hover:text-white hover:bg-slate-800';
+          }
+        } else {
+          btn.disabled = true;
+          btn.className = 'tf-btn py-1.5 px-2 rounded-lg text-xs font-medium transition text-center text-slate-600 opacity-30 cursor-not-allowed';
+        }
+      });
+    }
+
+    // CSV Parser
+    function parseCSV(text) {
+      const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
+      if (lines.length <= 1) return [];
+
+      const rows = [];
+      // Skip header line
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        // Handle CSV split with commas inside quotes if any
+        const parts = [];
+        let cur = '';
+        let inQuotes = false;
+        for (let c of line) {
+          if (c === '"') { inQuotes = !inQuotes; }
+          else if (c === ',' && !inQuotes) {
+            parts.push(cur);
+            cur = '';
+          } else {
+            cur += c;
+          }
+        }
+        parts.push(cur);
+
+        if (parts.length >= 6) {
+          const id = parseInt(parts[0].trim(), 10) || 0;
+          const title = parts[1].trim();
+          const acceptance = parts[2].trim();
+          const difficulty = parts[3].trim();
+          const frequency = parseFloat(parts[4].trim()) || 0.0;
+          const link = parts[5].trim();
+
+          rows.push({
+            id,
+            title,
+            acceptance,
+            acceptanceNum: parseFloat(acceptance.replace('%', '')) || 0,
+            difficulty,
+            frequency,
+            link
+          });
+        }
+      }
+      return rows;
+    }
+
+    // Fetch and Load Dataset
+    async function loadDataset() {
+      questionsTableBody.innerHTML = `
+        <tr>
+          <td colspan="9" class="py-12 text-center text-slate-500">
+            <div class="animate-pulse flex flex-col items-center justify-center gap-2">
+              <div class="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"></div>
+              <span>Loading questions for ${formatCompanyName(currentCompany)}...</span>
+            </div>
+          </td>
+        </tr>`;
+
+      const path = `${currentCompany}/${currentTimeframe}.csv`;
+
+      try {
+        const res = await fetch(path);
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+        const text = await res.text();
+        const parsed = parseCSV(text);
+
+        // Sort parsed initially by frequency descending to assign definitive interview ranks
+        parsed.sort((a, b) => b.frequency - a.frequency);
+        
+        // Assign definitive rank property (#1 to #N)
+        rawQuestions = parsed.map((item, index) => ({
+          ...item,
+          rank: index + 1
+        }));
+
+        currentPage = 1;
+        applyFiltersAndRender();
+        updateStats();
+
+      } catch (err) {
+        console.error("Error loading CSV:", err);
+        questionsTableBody.innerHTML = `
+          <tr>
+            <td colspan="9" class="py-12 text-center text-rose-400">
+              <div class="flex flex-col items-center gap-2">
+                <span class="text-2xl">⚠️</span>
+                <p class="font-semibold">Unable to load dataset: <code>${path}</code></p>
+                <p class="text-xs text-slate-400 max-w-md">If you are viewing this locally via <code>file:///</code>, please run <code>python serve.py</code> to allow browser data loading.</p>
+              </div>
+            </td>
+          </tr>`;
+      }
+    }
+
+    // Update Stats & Progress Bar
+    function updateStats() {
+      const total = rawQuestions.length;
+      statTotal.textContent = total;
+      statCompanyLabel.textContent = `${formatCompanyName(currentCompany)} (${currentTimeframe.replace('months','M').replace('year','Y')})`;
+
+      const easyCount = rawQuestions.filter(q => q.difficulty.toLowerCase() === 'easy').length;
+      const medCount = rawQuestions.filter(q => q.difficulty.toLowerCase() === 'medium').length;
+      const hardCount = rawQuestions.filter(q => q.difficulty.toLowerCase() === 'hard').length;
+
+      statEasy.textContent = easyCount;
+      statMed.textContent = medCount;
+      statHard.textContent = hardCount;
+
+      const easyPct = total ? Math.round((easyCount / total) * 100) : 0;
+      const medPct = total ? Math.round((medCount / total) * 100) : 0;
+      const hardPct = total ? Math.round((hardCount / total) * 100) : 0;
+
+      statEasyPct.textContent = `${easyPct}%`;
+      statMedPct.textContent = `${medPct}%`;
+      statHardPct.textContent = `${hardPct}%`;
+
+      statEasyBar.style.width = `${easyPct}%`;
+      statMedBar.style.width = `${medPct}%`;
+      statHardBar.style.width = `${hardPct}%`;
+
+      // Solved progress for this company
+      const solvedInCurrent = rawQuestions.filter(q => solvedSet.has(q.id)).length;
+      const solvedPct = total ? Math.round((solvedInCurrent / total) * 100) : 0;
+
+      solvedProgressCount.textContent = `${solvedInCurrent} / ${total} Solved`;
+      solvedProgressPct.textContent = `(${solvedPct}%)`;
+      solvedProgressBar.style.width = `${solvedPct}%`;
+    }
+
+    // Filter, Sort, and Render
+    function applyFiltersAndRender() {
+      let list = [...rawQuestions];
+
+      // Difficulty Filter
+      if (currentDifficulty !== 'all') {
+        list = list.filter(q => q.difficulty.toLowerCase() === currentDifficulty.toLowerCase());
+      }
+
+      // Status Filter
+      if (currentStatus === 'solved') {
+        list = list.filter(q => solvedSet.has(q.id));
+      } else if (currentStatus === 'unsolved') {
+        list = list.filter(q => !solvedSet.has(q.id));
+      } else if (currentStatus === 'starred') {
+        list = list.filter(q => starredSet.has(q.id));
+      }
+
+      // Keyword Search
+      if (searchQuery.trim().length > 0) {
+        const qLower = searchQuery.toLowerCase().trim();
+        list = list.filter(q => 
+          q.title.toLowerCase().includes(qLower) || 
+          q.id.toString().includes(qLower)
+        );
+      }
+
+      // Sorting
+      if (currentSort === 'rank-asc') {
+        list.sort((a, b) => a.rank - b.rank);
+      } else if (currentSort === 'id-asc') {
+        list.sort((a, b) => a.id - b.id);
+      } else if (currentSort === 'id-desc') {
+        list.sort((a, b) => b.id - a.id);
+      } else if (currentSort === 'acc-desc') {
+        list.sort((a, b) => b.acceptanceNum - a.acceptanceNum);
+      } else if (currentSort === 'acc-asc') {
+        list.sort((a, b) => a.acceptanceNum - b.acceptanceNum);
+      } else if (currentSort === 'title-asc') {
+        list.sort((a, b) => a.title.localeCompare(b.title));
+      }
+
+      filteredQuestions = list;
+      renderTable();
+    }
+
+    // Render Table Page
+    function renderTable() {
+      const totalFiltered = filteredQuestions.length;
+      filteredCount.textContent = totalFiltered;
+
+      if (totalFiltered === 0) {
+        questionsTableBody.innerHTML = `
+          <tr>
+            <td colspan="9" class="py-12 text-center text-slate-500">
+              No questions found matching your filter criteria.
+            </td>
+          </tr>`;
+        showingCount.textContent = 0;
+        pageIndicator.textContent = "Page 0 of 0";
+        prevPageBtn.disabled = true;
+        nextPageBtn.disabled = true;
+        return;
+      }
+
+      const effectivePageSize = pageSize === 'all' ? totalFiltered : parseInt(pageSize, 10);
+      const totalPages = Math.ceil(totalFiltered / effectivePageSize);
+
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIndex = (currentPage - 1) * effectivePageSize;
+      const endIndex = Math.min(startIndex + effectivePageSize, totalFiltered);
+      const pageSlice = filteredQuestions.slice(startIndex, endIndex);
+
+      showingCount.textContent = `${startIndex + 1} - ${endIndex}`;
+      pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+      prevPageBtn.disabled = currentPage <= 1;
+      nextPageBtn.disabled = currentPage >= totalPages;
+
+      let html = '';
+      pageSlice.forEach(q => {
+        const isSolved = solvedSet.has(q.id);
+        const isStarred = starredSet.has(q.id);
+
+        let diffBadgeClass = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+        if (q.difficulty.toLowerCase() === 'medium') diffBadgeClass = 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+        if (q.difficulty.toLowerCase() === 'hard') diffBadgeClass = 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+
+        // Rank styling for Top 3
+        let rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">#${q.rank}</span>`;
+        if (q.rank === 1) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold gold-rank shadow-md shadow-amber-500/20" title="Rank 1 Most Frequent">#1</span>`;
+        if (q.rank === 2) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold silver-rank shadow-md shadow-slate-400/20" title="Rank 2 Most Frequent">#2</span>`;
+        if (q.rank === 3) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold bronze-rank shadow-md shadow-orange-500/20" title="Rank 3 Most Frequent">#3</span>`;
+
+        // Calculate max frequency in dataset for normalized bar
+        const maxFreq = rawQuestions[0]?.frequency || 1.0;
+        const freqBarWidth = Math.min(100, Math.round((q.frequency / maxFreq) * 100));
+
+        html += `
+          <tr class="hover:bg-slate-800/40 transition group ${isSolved ? 'opacity-60 bg-slate-900/40' : ''}">
+            <td class="py-3 px-3 text-center">
+              <input type="checkbox" data-id="${q.id}" class="solve-checkbox w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer" ${isSolved ? 'checked' : ''}>
+            </td>
+            <td class="py-3 px-2 text-center">
+              <button data-id="${q.id}" class="star-btn text-sm hover:scale-125 transition ${isStarred ? 'text-amber-400' : 'text-slate-600 hover:text-slate-400'}">
+                ${isStarred ? '★' : '☆'}
+              </button>
+            </td>
+            <td class="py-3 px-3 text-center">
+              ${rankBadge}
+            </td>
+            <td class="py-3 px-3 text-left">
+              <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700/60 text-slate-300 font-mono text-[11px]">#${q.id}</span>
+            </td>
+            <td class="py-3 px-4 text-left">
+              <a href="${q.link}" target="_blank" rel="noopener noreferrer" class="font-semibold text-white group-hover:text-blue-400 transition flex items-center gap-1.5 ${isSolved ? 'line-through text-slate-400' : ''}">
+                <span>${q.title}</span>
+                <svg class="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+              </a>
+            </td>
+            <td class="py-3 px-3 text-left">
+              <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold border ${diffBadgeClass}">
+                ${q.difficulty}
+              </span>
+            </td>
+            <td class="py-3 px-3 text-left text-slate-300 font-mono">
+              ${q.acceptance}
+            </td>
+            <td class="py-3 px-4 text-left">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-slate-300 text-[11px] w-10">${q.frequency.toFixed(3)}</span>
+                <div class="flex-1 bg-slate-800 h-1.5 rounded-full overflow-hidden max-w-[80px]">
+                  <div class="bg-blue-500 h-full rounded-full" style="width: ${freqBarWidth}%"></div>
+                </div>
+              </div>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <a href="${q.link}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 text-[11px] font-medium transition inline-flex items-center gap-1">
+                Solve ↗
+              </a>
+            </td>
+          </tr>`;
+      });
+
+      questionsTableBody.innerHTML = html;
+
+      // Attach Event Listeners to Checkboxes and Stars
+      document.querySelectorAll('.solve-checkbox').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+          const id = parseInt(e.target.dataset.id, 10);
+          if (e.target.checked) {
+            solvedSet.add(id);
+          } else {
+            solvedSet.delete(id);
+          }
+          localStorage.setItem('lc_solved_set', JSON.stringify([...solvedSet]));
+          updateStats();
+          applyFiltersAndRender();
+        });
+      });
+
+      document.querySelectorAll('.star-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = parseInt(btn.dataset.id, 10);
+          if (starredSet.has(id)) {
+            starredSet.delete(id);
+          } else {
+            starredSet.add(id);
+          }
+          localStorage.setItem('lc_starred_set', JSON.stringify([...starredSet]));
+          applyFiltersAndRender();
+        });
+      });
+    }
+
+    // Category Quick Filters
+    document.querySelectorAll('.cat-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.cat-pill').forEach(p => {
+          p.classList.remove('bg-blue-600', 'text-white', 'active');
+          p.classList.add('bg-slate-800', 'text-slate-300');
+        });
+        pill.classList.add('bg-blue-600', 'text-white', 'active');
+        pill.classList.remove('bg-slate-800', 'text-slate-300');
+
+        const cat = pill.dataset.category;
+        initCompanyDropdown(cat);
+        updateTimeframeTabs();
+        loadDataset();
+      });
+    });
+
+    // Company Change
+    companySelect.addEventListener('change', (e) => {
+      currentCompany = e.target.value;
+      localStorage.setItem('lc_selected_company', currentCompany);
+      updateTimeframeTabs();
+      loadDataset();
+    });
+
+    // Timeframe Change
+    timeframeTabs.addEventListener('click', (e) => {
+      const btn = e.target.closest('.tf-btn');
+      if (!btn || btn.disabled) return;
+      currentTimeframe = btn.dataset.tf;
+      localStorage.setItem('lc_selected_timeframe', currentTimeframe);
+      updateTimeframeTabs();
+      loadDataset();
+    });
+
+    // Search Input
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      if (searchQuery.length > 0) {
+        clearSearchBtn.classList.remove('hidden');
+      } else {
+        clearSearchBtn.classList.add('hidden');
+      }
+      currentPage = 1;
+      applyFiltersAndRender();
+    });
+
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      searchQuery = '';
+      clearSearchBtn.classList.add('hidden');
+      currentPage = 1;
+      applyFiltersAndRender();
+    });
+
+    // Difficulty Buttons
+    document.querySelectorAll('.diff-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.diff-btn').forEach(b => {
+          b.classList.remove('bg-slate-800', 'text-white');
+        });
+        btn.classList.add('bg-slate-800', 'text-white');
+        currentDifficulty = btn.dataset.diff;
+        currentPage = 1;
+        applyFiltersAndRender();
+      });
+    });
+
+    // Status Filter
+    statusFilter.addEventListener('change', (e) => {
+      currentStatus = e.target.value;
+      currentPage = 1;
+      applyFiltersAndRender();
+    });
+
+    // Sort Select
+    sortSelect.addEventListener('change', (e) => {
+      currentSort = e.target.value;
+      currentPage = 1;
+      applyFiltersAndRender();
+    });
+
+    // Page Size
+    pageSizeSelect.addEventListener('change', (e) => {
+      pageSize = e.target.value;
+      currentPage = 1;
+      applyFiltersAndRender();
+    });
+
+    // Pagination
+    prevPageBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+      }
+    });
+
+    nextPageBtn.addEventListener('click', () => {
+      currentPage++;
+      renderTable();
+    });
+
+    // Random Problem Pick
+    randomBtn.addEventListener('click', () => {
+      const unsolved = rawQuestions.filter(q => !solvedSet.has(q.id));
+      if (unsolved.length === 0) {
+        alert('🎉 Congratulations! You have solved all problems in this dataset!');
+        return;
+      }
+      const pick = unsolved[Math.floor(Math.random() * unsolved.length)];
+      if (confirm(`🎲 Random Pick: #${pick.rank} - LC ${pick.id}: "${pick.title}" (${pick.difficulty})\n\nWould you like to open it on LeetCode now?`)) {
+        window.open(pick.link, '_blank');
+      }
+    });
+
+    // Export CSV
+    exportBtn.addEventListener('click', () => {
+      if (filteredQuestions.length === 0) {
+        alert('No questions to export.');
+        return;
+      }
+      let csvContent = "Rank,ID,Title,Difficulty,Acceptance,Frequency,Leetcode Link\n";
+      filteredQuestions.forEach(q => {
+        csvContent += `"${q.rank}","${q.id}","${q.title.replace(/"/g, '""')}","${q.difficulty}","${q.acceptance}","${q.frequency}","${q.link}"\n`;
+      });
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `${currentCompany}_${currentTimeframe}_ranked.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    // Reset Progress
+    resetProgressBtn.addEventListener('click', () => {
+      if (confirm(`Reset all solved checkmarks for ${formatCompanyName(currentCompany)}?`)) {
+        rawQuestions.forEach(q => solvedSet.delete(q.id));
+        localStorage.setItem('lc_solved_set', JSON.stringify([...solvedSet]));
+        updateStats();
+        applyFiltersAndRender();
+      }
+    });
+
+    // Theme Toggle (Light / Dark)
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      themeIcon.textContent = isDark ? '☀️' : '🌙';
+      localStorage.setItem('lc_theme', isDark ? 'dark' : 'light');
+    });
+
+    if (localStorage.getItem('lc_theme') === 'light') {
+      document.documentElement.classList.remove('dark');
+      themeIcon.textContent = '🌙';
+    }
+
+    // Initial Startup
+    initCompanyDropdown('faang');
+    updateTimeframeTabs();
+    loadDataset();
+  </script>
+</body>
+</html>
